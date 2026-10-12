@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0B57D0" />
+<title>आजको समाचार</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+<style>
+  /* ============ MATERIAL YOU 3 TONAL SYSTEM ============ */
+  :root {
+    --m3-primary: #0B57D0;
+    --m3-on-primary: #FFFFFF;
+    --m3-primary-container: #D3E3FD;
+    --m3-on-primary-container: #041E49;
+    --m3-surface: #FDFBFF;
+    --m3-surface-container: #F0F3FA;
+    --m3-surface-container-high: #E9EEF6;
+    --m3-surface-container-highest: #E1E6EF;
+    --m3-on-surface: #1A1C1E;
+    --m3-on-surface-variant: #44474E;
+    --m3-outline: #C4C6CF;
+    --m3-outline-variant: #E1E2EC;
+    --m3-scrim: rgba(0,0,0,0.4);
+
+    --radius-xs: 8px;
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-full: 100px;
+
+    --elev-1: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    --elev-2: 0 2px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.06);
+    --elev-3: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+
+    --anim: 0.24s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  body.dark-mode {
+    --m3-primary: #A8C7FA;
+    --m3-on-primary: #062E6F;
+    --m3-primary-container: #0A3D8F;
+    --m3-on-primary-container: #D3E3FD;
+    --m3-surface: #101418;
+    --m3-surface-container: #1A1F24;
+    --m3-surface-container-high: #232A31;
+    --m3-surface-container-highest: #2C333A;
+    --m3-on-surface: #E2E2E6;
+    --m3-on-surface-variant: #C4C6CF;
+    --m3-outline: #44474E;
+    --m3-outline-variant: #2A2F35;
+    --m3-scrim: rgba(0,0,0,0.6);
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--m3-surface-container);
+    font-family: 'Outfit', 'Mukta', system-ui, sans-serif;
+    color: var(--m3-on-surface);
+    padding-bottom: 120px;
+    transition: background 0.3s, color 0.3s;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============ RIPPLE ============ */
+  .ripple {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .ripple::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(11,87,208,0.15) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+  .ripple:active::after { opacity: 1; transition: opacity 0s; }
+
+  /* ============ SPLASH ============ */
+  #splash {
+    position: fixed; inset: 0;
+    background: var(--m3-surface);
+    z-index: 9999;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 20px;
+    transition: opacity 0.4s ease, visibility 0.4s;
+  }
+  #splash.hide { opacity: 0; visibility: hidden; }
+  #splash img {
+    width: 100px;
+    animation: splashPop 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #splash .splash-brand {
+    font-family: 'Mukta', sans-serif;
+    font-weight: 800; font-size: 1.4rem;
+    color: var(--m3-primary);
+    letter-spacing: 0.5px;
+    opacity: 0;
+    animation: splashFade 1.5s 0.4s forwards;
+  }
+  #splash .splash-loader {
+    width: 32px; height: 32px;
+    border: 3px solid var(--m3-primary-container);
+    border-top-color: var(--m3-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    opacity: 0;
+    animation: spin 0.8s linear infinite, splashFade 1s 0.6s forwards;
+  }
+  @keyframes splashPop {
+    0% { transform: scale(0.6); opacity: 0; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes splashFade { to { opacity: 1; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ============ TOP APP BAR ============ */
+  .app-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--m3-surface-container);
+    padding: 12px 8px 8px;
+    display: flex; align-items: center; gap: 4px;
+    transition: background 0.3s;
+  }
+  .app-bar-brand {
+    flex: 1;
+    font-family: 'Mukta', sans-serif;
+    font-weight: 800;
+    font-size: 1.35rem;
+    color: var(--m3-on-surface);
+    letter-spacing: -0.3px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .app-bar-brand .dot {
+    width: 8px; height: 8px;
+    background: var(--m3-primary);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+  .icon-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--m3-on-surface-variant);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: background var(--anim);
+  }
+  .icon-btn:active { background: var(--m3-surface-container-high); }
+
+  /* ============ CATEGORY CHIPS (horizontal scroll) ============ */
+  .chips-scroll {
+    display: flex;
+    gap: 8px;
+    padding: 8px 16px 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+    background: var(--m3-surface-container);
+  }
+  .chips-scroll::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0;
+    padding: 9px 18px;
+    border-radius: var(--radius-full);
+    background: transparent;
+    border: 1px solid var(--m3-outline);
+    color: var(--m3-on-surface-variant);
+    font-family: 'Mukta', sans-serif;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: all var(--anim);
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .chip:active { transform: scale(0.95); }
+  .chip.active {
+    background: var(--m3-primary-container);
+    color: var(--m3-on-primary-container);
+    border-color: transparent;
+    font-weight: 700;
+  }
+  .chip i { font-size: 0.85rem; }
+
+  /* ============ HERO FEATURED ============ */
+  .hero-wrap {
+    padding: 4px 16px 8px;
+    background: var(--m3-surface-container);
+  }
+  .hero-card {
+    position: relative;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    height: 300px;
+    background: var(--m3-surface-container-high);
+    box-shadow: var(--elev-2);
+    cursor: pointer;
+    transition: transform var(--anim);
+  }
+  .hero-card:active { transform: scale(0.985); }
+  .hero-card img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 35%, transparent 65%);
+  }
+  .hero-content {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 20px 18px 18px;
+    color: white;
+  }
+  .hero-source {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px 5px 6px;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 10px;
+  }
+  .hero-source .src-dot {
+    width: 16px; height: 16px;
+    background: var(--m3-primary);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.55rem; font-weight: 800;
+    color: white;
+  }
+  .hero-title {
+    font-family: 'Mukta', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+  .hero-dots {
+    display: flex; gap: 5px;
+    margin-top: 12px;
+  }
+  .hero-dots span {
+    height: 3px; width: 16px;
+    background: rgba(255,255,255,0.35);
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
+  .hero-dots span.active {
+    background: white;
+    width: 24px;
+  }
+
+  /* ============ SECTION TITLE ============ */
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 10px;
+    background: var(--m3-surface-container);
+  }
+  .section-head h2 {
+    font-family: 'Mukta', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    margin: 0;
+    color: var(--m3-on-surface);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-head h2 i { color: var(--m3-primary); font-size: 1rem; }
+
+  /* ============ NEWS LIST CARD (Android Google News style) ============ */
+  .news-list {
+    padding: 0 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .ncard {
+    display: flex;
+    gap: 14px;
+    padding: 14px;
+    background: var(--m3-surface);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: background var(--anim), transform var(--anim);
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+  }
+  .ncard:active { background: var(--m3-surface-container-high); transform: scale(0.99); }
+  .ncard-thumb {
+    width: 92px; height: 92px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--m3-surface-container-high);
+  }
+  .ncard-body {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column;
+    gap: 6px;
+  }
+  .ncard-meta {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.72rem;
+    color: var(--m3-on-surface-variant);
+    font-weight: 600;
+  }
+  .ncard-meta .src {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: var(--m3-primary);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-size: 0.7rem;
+  }
+  .ncard-meta .src-dot {
+    width: 14px; height: 14px;
+    background: var(--m3-primary);
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.5rem; font-weight: 800;
+  }
+  .ncard-meta .time { opacity: 0.9; }
+  .ncard-title {
+    font-family: 'Mukta', sans-serif;
+    font-weight: 700;
+    font-size: 0.98rem;
+    line-height: 1.42;
+    color: var(--m3-on-surface);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ============ FULL CARD (grid mode) ============ */
+  .gcard {
+    background: var(--m3-surface);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform var(--anim);
+    margin-bottom: 14px;
+  }
+  .gcard:active { transform: scale(0.985); }
+  .gcard img {
+    width: 100%; height: 190px;
+    object-fit: cover;
+    display: block;
+    background: var(--m3-surface-container-high);
+  }
+  .gcard-body { padding: 14px 16px 16px; }
+  .gcard-title {
+    font-family: 'Mukta', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.45;
+    margin: 8px 0 0;
+    color: var(--m3-on-surface);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ============ BOTTOM NAV (Material 3 pill) ============ */
+  .bottom-nav {
+    position: fixed;
+    bottom: 16px; left: 16px; right: 16px;
+    height: 72px;
+    background: var(--m3-surface-container-high);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 900;
+    box-shadow: var(--elev-3);
+    padding: 0 8px;
+    transition: background 0.3s;
+  }
+  body.dark-mode .bottom-nav { background: var(--m3-surface-container-high); }
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    background: transparent;
+    border: none;
+    color: var(--m3-on-surface-variant);
+    font-family: 'Mukta', sans-serif;
+    font-weight: 600;
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 8px 4px;
+    border-radius: var(--radius-full);
+    transition: all var(--anim);
+    position: relative;
+    height: 56px;
+    max-width: 90px;
+  }
+  .nav-btn i {
+    font-size: 1.2rem;
+    transition: all var(--anim);
+    z-index: 1;
+  }
+  .nav-btn span { z-index: 1; }
+  .nav-btn.active {
+    color: var(--m3-on-primary-container);
+  }
+  .nav-btn.active::before {
+    content: '';
+    position: absolute;
+    inset: 6px 8px;
+    background: var(--m3-primary-container);
+    border-radius: var(--radius-full);
+    transition: all var(--anim);
+  }
+  .nav-btn:active::before { opacity: 0.6; }
+
+  /* ============ BOTTOM SHEET READER ============ */
+  .reader-scrim {
+    position: fixed; inset: 0;
+    background: var(--m3-scrim);
+    z-index: 1999;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+  .reader-scrim.show { opacity: 1; visibility: visible; }
+
+  .reader-sheet {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    top: 12vh;
+    background: var(--m3-surface);
+    border-radius: 28px 28px 0 0;
+    z-index: 2000;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+  }
+  .reader-sheet.open { transform: translateY(0); }
+  .reader-drag {
+    width: 36px; height: 4px;
+    background: var(--m3-outline);
+    border-radius: 4px;
+    margin: 10px auto 4px;
+    flex-shrink: 0;
+  }
+  .reader-bar {
+    display: flex; align-items: center;
+    padding: 4px 8px 8px;
+    border-bottom: 1px solid var(--m3-outline-variant);
+    flex-shrink: 0;
+  }
+  .reader-bar .src-title {
+    flex: 1;
+    font-family: 'Mukta', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--m3-primary);
+    padding-left: 8px;
+  }
+  .reader-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 22px 40px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  .reader-content::-webkit-scrollbar { width: 3px; }
+  .reader-content::-webkit-scrollbar-thumb {
+    background: var(--m3-outline);
+    border-radius: 4px;
+  }
+  .reader-h1 {
+    font-family: 'Mukta', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    line-height: 1.35;
+    margin: 0 0 10px;
+    color: var(--m3-on-surface);
+  }
+  .reader-info {
+    display: flex; flex-wrap: wrap; gap: 10px 14px;
+    font-size: 0.8rem;
+    color: var(--m3-on-surface-variant);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .reader-info i { margin-right: 4px; color: var(--m3-primary); }
+  .reader-img {
+    width: 100%; max-height: 280px;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    margin-bottom: 18px;
+    background: var(--m3-surface-container-high);
+  }
+  .reader-text {
+    font-family: 'Mukta', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    color: var(--m3-on-surface);
+  }
+  .reader-cta {
+    display: block;
+    margin-top: 28px;
+    padding: 16px;
+    background: var(--m3-primary);
+    color: var(--m3-on-primary);
+    text-align: center;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: transform var(--anim);
+  }
+  .reader-cta:active { transform: scale(0.97); }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar-backdrop {
+    position: fixed; inset: 0;
+    background: var(--m3-scrim);
+    z-index: 1100;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.25s, visibility 0.25s;
+  }
+  .sidebar-backdrop.show { opacity: 1; visibility: visible; }
+  .sidebar {
+    position: fixed;
+    top: 0; bottom: 0; left: 0;
+    width: 290px;
+    background: var(--m3-surface-container);
+    z-index: 1101;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+    display: flex; flex-direction: column;
+    padding: 20px 0;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.08);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-head {
+    padding: 8px 20px 24px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--m3-outline-variant);
+    margin-bottom: 16px;
+  }
+  .sidebar-head .logo {
+    width: 44px; height: 44px;
+    background: var(--m3-primary);
+    color: white;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.2rem;
+    font-family: 'Mukta';
+  }
+  .sidebar-head .title {
+    font-family: 'Mukta', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+  }
+  .sidebar-head .sub {
+    font-size: 0.72rem;
+    color: var(--m3-on-surface-variant);
+    margin-top: 2px;
+  }
+  .sidebar a {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 22px;
+    margin: 2px 12px;
+    border-radius: var(--radius-full);
+    color: var(--m3-on-surface);
+    text-decoration: none;
+    font-family: 'Mukta', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background var(--anim);
+  }
+  .sidebar a:active { background: var(--m3-surface-container-high); }
+  .sidebar a i {
+    width: 24px;
+    color: var(--m3-primary);
+    font-size: 1.05rem;
+  }
+
+  /* ============ TAJA CARD ============ */
+  .taja-item {
+    display: flex; gap: 12px;
+    padding: 16px 18px;
+    background: var(--m3-surface);
+    border-radius: var(--radius-lg);
+    margin-bottom: 8px;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: background var(--anim), transform var(--anim);
+  }
+  .taja-item:active { background: var(--m3-surface-container-high); transform: scale(0.99); }
+  .taja-num {
+    width: 32px; height: 32px; flex-shrink: 0;
+    background: var(--m3-primary-container);
+    color: var(--m3-on-primary-container);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Mukta', sans-serif;
+    font-weight: 800; font-size: 0.9rem;
+  }
+  .taja-body { flex: 1; min-width: 0; }
+  .taja-src {
+    font-size: 0.68rem; font-weight: 800;
+    color: var(--m3-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .taja-title {
+    font-family: 'Mukta', sans-serif;
+    font-weight: 600;
+    font-size: 0.98rem;
+    line-height: 1.45;
+    color: var(--m3-on-surface);
+  }
+
+  /* ============ CATEGORY GRID ============ */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 16px;
+  }
+  .cat-card {
+    background: var(--m3-surface);
+    border-radius: var(--radius-xl);
+    padding: 24px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--anim);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 12px;
+  }
+  .cat-card:active { transform: scale(0.96); background: var(--m3-surface-container-high); }
+  .cat-card .icon-wrap {
+    width: 56px; height: 56px;
+    border-radius: 20px;
+    background: var(--m3-primary-container);
+    color: var(--m3-primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+  }
+  .cat-card .label {
+    font-family: 'Mukta', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--m3-on-surface);
+  }
+
+  /* ============ IN-APP NOTIFICATION ============ */
+  .notif {
+    position: fixed;
+    top: -120px; left: 12px; right: 12px;
+    background: var(--m3-surface-container-highest);
+    border-radius: var(--radius-xl);
+    padding: 14px 16px;
+    display: flex; gap: 12px; align-items: center;
+    z-index: 3000;
+    box-shadow: var(--elev-3);
+    transition: top 0.45s cubic-bezier(0.2, 0.9, 0.4, 1);
+    cursor: pointer;
+  }
+  .notif.show { top: 16px; }
+  .notif img {
+    width: 42px; height: 42px;
+    border-radius: 14px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .notif-body { flex: 1; min-width: 0; }
+  .notif-tag {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: var(--m3-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  .notif-msg {
+    font-family: 'Mukta', sans-serif;
+    font-weight: 600;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--m3-on-surface);
+  }
+
+  /* ============ SHIMMER ============ */
+  .shimmer {
+    background: linear-gradient(90deg, var(--m3-surface-container) 4%, var(--m3-surface-container-high) 25%, var(--m3-surface-container) 36%);
+    background-size: 200% 100%;
+    animation: shim 1.4s linear infinite;
+    border-radius: var(--radius-md);
+  }
+  @keyframes shim {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* ============ MISC ============ */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--m3-on-surface-variant);
+    font-family: 'Mukta', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .empty i {
+    display: block;
+    font-size: 2.5rem;
+    margin-bottom: 14px;
+    color: var(--m3-outline);
+  }
+  .view-fade {
+    animation: viewFade 0.3s ease;
+  }
+  @keyframes viewFade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const e = React.createElement;
+const { useState, useEffect, useRef, useMemo } = React;
+
+const FEEDS = [
+  { name: "OnlineKhabar", url: "https://www.onlinekhabar.com/feed" },
+  { name: "Setopati", url: "https://setopati.com/feed" },
+  { name: "Ratopati", url: "https://www.ratopati.com/feed" },
+  { name: "Kantipur", url: "https://ekantipur.com/rss/news" },
+  { name: "TechPana", url: "https://www.techpana.com/feed" },
+  { name: "BBC Nepali", url: "https://www.bbc.co.uk/nepali/index.xml" },
+  { name: "Our Biratnagar", url: "https://ourbiratnagar.net/feed" },
+  { name: "Nepal Press", url: "https://www.nepalpress.com/feed" },
+  { name: "Himal Khabar", url: "https://www.himalkhabar.com/rss" },
+  { name: "Nepal News", url: "https://nepalnews.com/rss" },
+  { name: "Image Khabar", url: "https://www.imagekhabar.com/feed" },
+  { name: "Annapurna Post", url: "https://annapurnapost.com/rss" },
+  { name: "DC Nepal", url: "https://www.dcnepal.com/feed" },
+  { name: "Nepal Khabar", url: "https://nepalkhabar.com/rss" },
+  { name: "ICT frame", url: "https://np.ictframe.com/rss" },
+  { name: "Technology Khabar", url: "https://www.technologykhabar.com/rss" },
+  { name: "News filmy", url: "https://newsfilmy.com/rss" },
+  { name: "Nepali Paisa", url: "https://nepalipaisa.com/rss" },
+  { name: "Ramailo Cha", url: "https://www.ramailo6.com/rss" },
+  { name: "Bizmandu", url: "https://bizmandu.com/rss" },
+  { name: "Baahrakhari", url: "https://baahrakhari.com/feed" }
+];
+
+const CATEGORIES = [
+  { id: 'All', label: 'सबै', icon: 'fa-th-large' },
+  { id: 'Politics', label: 'राजनीति', icon: 'fa-landmark' },
+  { id: 'Sports', label: 'खेलकुद', icon: 'fa-trophy' },
+  { id: 'Tech', label: 'प्रविधि', icon: 'fa-microchip' },
+  { id: 'Entertainment', label: 'मनोरञ्जन', icon: 'fa-film' },
+  { id: 'Economy', label: 'अर्थ', icon: 'fa-chart-line' }
+];
+
+function cleanSourceName(name) {
+  if (!name) return 'समाचार';
+  const n = name.toLowerCase();
+  if (n.includes('onlinekhabar')) return 'अनलाइनखबर';
+  if (n.includes('setopati')) return 'सेतोपाटी';
+  if (n.includes('ratopati')) return 'रातोपाटी';
+  if (n.includes('nepalkhabar')) return 'नेपालखबर';
+  if (n.includes('ourbiratnagar') || n.includes('biratnagar')) return 'हाम्रो विराटनगर';
+  if (n.includes('kantipur')) return 'कान्तिपुर';
+  if (n.includes('bbc')) return 'बीबीसी नेपाली';
+  if (n.includes('himal')) return 'हिमालखबर';
+  if (n.includes('annapurna')) return 'अन्नपूर्ण';
+  if (n.includes('bizmandu')) return 'बिजमाण्डू';
+  let parts = name.split(' ');
+  return parts.length > 1 ? parts[0] + ' ' + parts[1] : parts[0];
+}
+
+function getTopic(title) {
+  if (/खेल|क्रिकेट|फुटबल/i.test(title)) return 'Sports';
+  if (/राजनीति|नेता|सरकार|संसद|मन्त्री/i.test(title)) return 'Politics';
+  if (/प्रविधि|मोबाइल|इन्टरनेट|इलेक्ट्रोनिक्स/i.test(title)) return 'Tech';
+  if (/फिल्म|मनोरञ्जन|कलाकार|भिडियो|सिनेमा/i.test(title)) return 'Entertainment';
+  if (/बैंक|अर्थ|बजार|शेयर|पूंजी|बजेट/i.test(title)) return 'Economy';
+  return 'General';
+}
+
+function getImage(item) {
+  return item.thumbnail
+    || item.enclosure?.link
+    || item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
+}
+
+function relTime(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  const diff = (Date.now() - d.getTime()) / 1000;
+  if (diff < 60) return 'अहिले';
+  if (diff < 3600) return Math.floor(diff/60) + ' मिनेट अघि';
+  if (diff < 86400) return Math.floor(diff/3600) + ' घण्टा अघि';
+  if (diff < 604800) return Math.floor(diff/86400) + ' दिन अघि';
+  return d.toLocaleDateString('ne-NP', { month: 'short', day: 'numeric' });
+}
+
+function App() {
+  const [allNews, setAllNews] = useState([]);
+  const [activeCat, setActiveCat] = useState('All');
+  const [savedNews, setSavedNews] = useState(() => JSON.parse(localStorage.getItem('savedNews') || '[]'));
+  const [view, setView] = useState('home');
+  const [readerItem, setReaderItem] = useState(null);
+  const [sidebar, setSidebar] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
+  const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
+  const [heroIdx, setHeroIdx] = useState(0);
+  const [notif, setNotif] = useState(null);
+  const [notifShow, setNotifShow] = useState(false);
+  const lastLink = useRef(localStorage.getItem('lastTrackedLink') || '');
+  const ignorePop = useRef(false);
+
+  // theme
+  useEffect(() => {
+    document.body.classList.toggle('dark-mode', darkMode);
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]);
+
+  // splash + first fetch
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setShowSplash(false);
+      window.history.pushState({ view: 'home', modal: false }, '');
+      fetchNews();
+    }, 1700);
+    return () => clearTimeout(t);
+  }, []);
+
+  // silent poll
+  useEffect(() => {
+    const id = setInterval(() => fetchNews(true), 60000);
+    return () => clearInterval(id);
+  }, [allNews]);
+
+  // hardware back
+  useEffect(() => {
+    const onPop = () => {
+      if (ignorePop.current) { ignorePop.current = false; return; }
+      if (readerItem) { setReaderItem(null); }
+      else if (view !== 'home') {
+        setView('home');
+        window.scrollTo(0, 0);
+      }
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [readerItem, view]);
+
+  const pushState = (v, modal = false) => {
+    ignorePop.current = true;
+    window.history.pushState({ view: v, modal }, '');
+    setTimeout(() => { ignorePop.current = false; }, 50);
+  };
+
+  const openReader = (item) => {
+    setReaderItem(item);
+    pushState(view, true);
+  };
+
+  const changeView = (v) => {
+    setView(v);
+    window.scrollTo(0, 0);
+    pushState(v);
+  };
+
+  const playSound = () => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const now = ctx.currentTime;
+      [523.25, 659.25].forEach((f, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.setValueAtTime(f, now + i * 0.1);
+        g.gain.setValueAtTime(0.08, now + i * 0.1);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.1 + 0.25);
+        o.start(now + i * 0.1); o.stop(now + i * 0.1 + 0.3);
+      });
+    } catch (_) {}
+  };
+
+  const fetchNews = async (silent = false) => {
+    if (!silent) setLoading(true);
+    try {
+      const results = await Promise.allSettled(
+        FEEDS.map(f => fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`).then(r => r.json()))
+      );
+      const items = results
+        .filter(r => r.status === 'fulfilled' && r.value?.items)
+        .flatMap(r => {
+          const data = r.value;
+          return data.items.map(item => ({
+            ...item,
+            sourceName: cleanSourceName(data.feed?.title || data.feed?.name),
+            topic: getTopic(item.title)
+          }));
+        });
+      items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+      if (items.length > 0) {
+        if (lastLink.current && lastLink.current !== items[0].link) {
+          setNotif(items[0]);
+          setNotifShow(true);
+          playSound();
+          setTimeout(() => setNotifShow(false), 6000);
+        }
+        lastLink.current = items[0].link;
+        localStorage.setItem('lastTrackedLink', items[0].link);
+      }
+      setAllNews(items);
+    } catch (err) { console.error(err); }
+    finally { if (!silent) setLoading(false); }
+  };
+
+  const handleShare = async (item) => {
+    if (navigator.share) {
+      try { await navigator.share({ title: item.title, text: item.sourceName, url: item.link }); } catch (_) {}
+    } else window.open(item.link, '_blank');
+  };
+
+  const toggleSave = (item) => {
+    const exists = savedNews.some(n => n.link === item.link);
+    const updated = exists ? savedNews.filter(n => n.link !== item.link) : [...savedNews, item];
+    setSavedNews(updated);
+    localStorage.setItem('savedNews', JSON.stringify(updated));
+  };
+
+  // filtered news by chip
+  const filteredNews = useMemo(() => {
+    if (activeCat === 'All') return allNews;
+    return allNews.filter(n => n.topic === activeCat);
+  }, [allNews, activeCat]);
+
+  // hero items
+  const heroItems = useMemo(() => filteredNews.filter(n => getImage(n)).slice(0, 6), [filteredNews]);
+  const listItems = useMemo(() => {
+    const heroLinks = new Set(heroItems.map(h => h.link));
+    return filteredNews.filter(n => !heroLinks.has(n.link));
+  }, [filteredNews, heroItems]);
+
+  // hero auto rotate
+  useEffect(() => {
+    if (heroItems.length < 2) return;
+    const id = setInterval(() => setHeroIdx(i => (i + 1) % heroItems.length), 5000);
+    return () => clearInterval(id);
+  }, [heroItems.length]);
+  useEffect(() => setHeroIdx(0), [activeCat]);
+
+  if (showSplash) {
+    return e('div', { id: 'splash' },
+      e('img', { src: 'https://raw.githubusercontent.com/ayushacharya05/aajakosamachar/main/images/icon.png', alt: '' }),
+      e('div', { className: 'splash-brand' }, 'आजको समाचार'),
+      e('div', { className: 'splash-loader' })
+    );
+  }
+
+  const activeCatObj = CATEGORIES.find(c => c.id === activeCat) || CATEGORIES[0];
+
+  return e('div', null,
+
+    // notification banner
+    e('div', {
+      className: `notif ${notifShow ? 'show' : ''}`,
+      onClick: () => { if (notif) { openReader(notif); setNotifShow(false); } }
+    },
+      e('img', { src: 'https://raw.githubusercontent.com/ayushacharya05/aajakosamachar/main/images/icon.png' }),
+      e('div', { className: 'notif-body' },
+        e('div', { className: 'notif-tag' }, notif ? `ताजा • ${notif.sourceName} 🔔` : ''),
+        e('div', { className: 'notif-msg' }, notif ? notif.title : '')
+      )
+    ),
+
+    // TOP APP BAR
+    e('header', { className: 'app-bar' },
+      e('button', { className: 'icon-btn ripple', onClick: () => setSidebar(true) },
+        e('i', { className: 'fas fa-bars-staggered' })),
+      e('div', { className: 'app-bar-brand' },
+        e('span', { className: 'dot' }),
+        'आजको समाचार'
+      ),
+      e('button', { className: 'icon-btn ripple', onClick: () => setDarkMode(!darkMode) },
+        e('i', { className: `fas ${darkMode ? 'fa-sun' : 'fa-moon'}` }))
+    ),
+
+    // SIDEBAR
+    e('div', { className: `sidebar-backdrop ${sidebar ? 'show' : ''}`, onClick: () => setSidebar(false) }),
+    e('aside', { className: `sidebar ${sidebar ? 'open' : ''}` },
+      e('div', { className: 'sidebar-head' },
+        e('div', { className: 'logo' }, 'आ'),
+        e('div', null,
+          e('div', { className: 'title' }, 'आजको समाचार'),
+          e('div', { className: 'sub' }, 'नेपाली न्यूज़ एग्रिगेटर')
+        )
+      ),
+      e('a', { href: 'https://aajakosamachar.ayushacharya5.com.np/app/about.html' },
+        e('i', { className: 'fas fa-info-circle' }), 'हाम्रो बारेमा'),
+      e('a', { href: 'https://aajakosamachar.ayushacharya5.com.np/app/support.html' },
+        e('i', { className: 'fas fa-headset' }), 'सहयोग'),
+      e('a', { href: '#', onClick: (ev) => { ev.preventDefault(); setDarkMode(!darkMode); setSidebar(false); } },
+        e('i', { className: `fas ${darkMode ? 'fa-sun' : 'fa-moon'}` }), darkMode ? 'उज्यालो मोड' : 'अँध्यारो मोड'),
+      e('div', { style: { flex: 1 } }),
+      e('div', { style: { padding: '20px 24px', fontSize: '0.7rem', color: 'var(--m3-on-surface-variant)' } },
+        'v2.0 · © Ayush Acharya')
+    ),
+
+    // MAIN
+    e('main', { className: 'view-fade', key: view + activeCat },
+
+      // HOME
+      view === 'home' && e('div', null,
+        // chips
+        e('div', { className: 'chips-scroll' },
+          CATEGORIES.map(c => e('button', {
+            key: c.id,
+            className: `chip ripple ${activeCat === c.id ? 'active' : ''}`,
+            onClick: () => setActiveCat(c.id)
+          },
+            e('i', { className: `fas ${c.icon}` }),
+            c.label
+          ))
+        ),
+
+        loading && e('div', { className: 'news-list' },
+          [1,2,3,4].map(n => e('div', { key: n, className: 'ncard' },
+            e('div', { className: 'shimmer ncard-thumb' }),
+            e('div', { className: 'ncard-body' },
+              e('div', { className: 'shimmer', style: { height: 12, width: '40%' } }),
+              e('div', { className: 'shimmer', style: { height: 14, width: '95%', marginTop: 4 } }),
+              e('div', { className: 'shimmer', style: { height: 14, width: '75%', marginTop: 4 } })
+            )
+          ))
+        ),
+
+        !loading && heroItems.length > 0 && e('div', { className: 'hero-wrap' },
+          e('div', { className: 'hero-card ripple', onClick: () => openReader(heroItems[heroIdx]) },
+            (() => {
+              const img = getImage(heroItems[heroIdx]);
+              return img ? e('img', { src: img, alt: '' }) : null;
+            })(),
+            e('div', { className: 'hero-overlay' }),
+            e('div', { className: 'hero-content' },
+              e('div', { className: 'hero-source' },
+                e('span', { className: 'src-dot' }, heroItems[heroIdx].sourceName.charAt(0)),
+                heroItems[heroIdx].sourceName
+              ),
+              e('h1', { className: 'hero-title' }, heroItems[heroIdx].title),
+              e('div', { className: 'hero-dots' },
+                heroItems.map((_, i) => e('span', { key: i, className: i === heroIdx ? 'active' : '' }))
+              )
+            )
+          )
+        ),
+
+        !loading && listItems.length > 0 && e('div', { className: 'section-head' },
+          e('h2', null,
+            e('i', { className: 'fas fa-bolt' }),
+            activeCat === 'All' ? 'ताजा अपडेट' : activeCatObj.label
+          )
+        ),
+
+        !loading && e('div', { className: 'news-list' },
+          listItems.slice(0, 30).map((item, i) => {
+            const img = getImage(item);
+            return e('article', {
+              key: item.link || i,
+              className: 'ncard ripple',
+              onClick: () => openReader(item)
+            },
+              img ? e('img', { className: 'ncard-thumb', src: img, alt: '' })
+                  : e('div', { className: 'ncard-thumb shimmer' }),
+              e('div', { className: 'ncard-body' },
+                e('div', { className: 'ncard-meta' },
+                  e('span', { className: 'src' },
+                    e('span', { className: 'src-dot' }, item.sourceName.charAt(0)),
+                    item.sourceName
+                  ),
+                  e('span', { className: 'time' }, '• ' + relTime(item.pubDate))
+                ),
+                e('h3', { className: 'ncard-title' }, item.title)
+              )
+            );
+          })
+        ),
+
+        !loading && listItems.length === 0 && heroItems.length === 0 && e('div', { className: 'empty' },
+          e('i', { className: 'fas fa-newspaper' }),
+          'यस विधामा कुनै समाचार उपलब्ध छैन।'
+        )
+      ),
+
+      // CATEGORIES VIEW
+      view === 'categories' && e('div', null,
+        e('div', { className: 'section-head' },
+          e('h2', null, e('i', { className: 'fas fa-grip-vertical' }), 'विधाहरू')
+        ),
+        e('div', { className: 'cat-grid' },
+          CATEGORIES.filter(c => c.id !== 'All').map(c => e('div', {
+            key: c.id,
+            className: 'cat-card ripple',
+            onClick: () => { setActiveCat(c.id); changeView('home'); }
+          },
+            e('div', { className: 'icon-wrap' }, e('i', { className: `fas ${c.icon}` })),
+            e('div', { className: 'label' }, c.label)
+          ))
+        )
+      ),
+
+      // TAJA VIEW (numbered list)
+      view === 'taja' && e('div', null,
+        e('div', { className: 'section-head' },
+          e('h2', null, e('i', { className: 'fas fa-fire-alt' }), 'ताजा ४०')
+        ),
+        e('div', { style: { padding: '0 16px' } },
+          loading ? [1,2,3,4,5].map(n => e('div', { key: n, className: 'taja-item' },
+            e('div', { className: 'shimmer', style: { width: 32, height: 32, borderRadius: 10 } }),
+            e('div', { className: 'taja-body' },
+              e('div', { className: 'shimmer', style: { height: 10, width: '30%', marginBottom: 6 } }),
+              e('div', { className: 'shimmer', style: { height: 14, width: '95%' } })
+            )
+          ))
+          : allNews.slice(0, 40).map((item, i) => e('div', {
+            key: item.link || i,
+            className: 'taja-item ripple',
+            onClick: () => openReader(item)
+          },
+            e('div', { className: 'taja-num' }, (i + 1).toString()),
+            e('div', { className: 'taja-body' },
+              e('span', { className: 'taja-src' }, item.sourceName),
+              e('div', { className: 'taja-title' }, item.title)
+            )
+          ))
+        )
+      ),
+
+      // SAVED VIEW
+      view === 'saved' && e('div', null,
+        e('div', { className: 'section-head' },
+          e('h2', null, e('i', { className: 'fas fa-bookmark' }), 'सेभ गरिएका')
+        ),
+        savedNews.length === 0
+          ? e('div', { className: 'empty' },
+              e('i', { className: 'far fa-bookmark' }),
+              'कुनै समाचार सेभ गरिएको छैन।')
+          : e('div', { className: 'news-list' },
+              savedNews.map((item, i) => {
+                const img = getImage(item);
+                return e('article', {
+                  key: item.link || i,
+                  className: 'ncard ripple',
+                  onClick: () => openReader(item)
+                },
+                  img ? e('img', { className: 'ncard-thumb', src: img, alt: '' })
+                      : e('div', { className: 'ncard-thumb shimmer' }),
+                  e('div', { className: 'ncard-body' },
+                    e('div', { className: 'ncard-meta' },
+                      e('span', { className: 'src' },
+                        e('span', { className: 'src-dot' }, item.sourceName.charAt(0)),
+                        item.sourceName
+                      )
+                    ),
+                    e('h3', { className: 'ncard-title' }, item.title)
+                  )
+                );
+              })
+            )
+      )
+    ),
+
+    // BOTTOM SHEET READER
+    readerItem && (() => {
+      const img = getImage(readerItem);
+      const isSaved = savedNews.some(n => n.link === readerItem.link);
+      const doc = new DOMParser().parseFromString(readerItem.content || readerItem.description || '', 'text/html');
+      const txt = doc.body.textContent || doc.body.innerText || '';
+      return e(React.Fragment, null,
+        e('div', { className: 'reader-scrim show', onClick: () => window.history.back() }),
+        e('div', { className: 'reader-sheet open' },
+          e('div', { className: 'reader-drag' }),
+          e('div', { className: 'reader-bar' },
+            e('button', { className: 'icon-btn ripple', onClick: () => window.history.back() },
+              e('i', { className: 'fas fa-arrow-left' })),
+            e('span', { className: 'src-title' }, readerItem.sourceName),
+            e('button', { className: 'icon-btn ripple', onClick: () => handleShare(readerItem) },
+              e('i', { className: 'fas fa-share-nodes' })),
+            e('button', { className: 'icon-btn ripple', onClick: () => toggleSave(readerItem) },
+              e('i', { className: `${isSaved ? 'fas' : 'far'} fa-bookmark`, style: { color: isSaved ? 'var(--m3-primary)' : '' } }))
+          ),
+          e('div', { className: 'reader-content' },
+            e('h1', { className: 'reader-h1' }, readerItem.title),
+            e('div', { className: 'reader-info' },
+              e('span', null, e('i', { className: 'fas fa-user-circle' }), readerItem.sourceName),
+              e('span', null, e('i', { className: 'fas fa-clock' }), relTime(readerItem.pubDate)),
+              readerItem.topic && e('span', null, e('i', { className: 'fas fa-tag' }), readerItem.topic)
+            ),
+            img && e('img', { className: 'reader-img', src: img, alt: '' }),
+            e('div', { className: 'reader-text' }, txt),
+            e('a', {
+              className: 'reader-cta ripple',
+              href: readerItem.link,
+              target: '_blank',
+              rel: 'noreferrer'
+            }, 'पूरा स्रोतमा हेर्नुहोस् →')
+          )
+        )
+      );
+    })(),
+
+    // BOTTOM NAV
+    e('nav', { className: 'bottom-nav' },
+      [
+        { id: 'home', label: 'होम', icon: 'fa-house' },
+        { id: 'categories', label: 'विधा', icon: 'fa-grip-vertical' },
+        { id: 'taja', label: 'ताजा', icon: 'fa-fire-alt' },
+        { id: 'saved', label: 'सेभ', icon: 'fa-bookmark' }
+      ].map(t => e('button', {
+        key: t.id,
+        className: `nav-btn ${view === t.id ? 'active' : ''}`,
+        onClick: () => changeView(t.id)
+      },
+        e('i', { className: `fas ${t.icon}` }),
+        e('span', null, t.label)
+      ))
+    )
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(e(App));
+</script>
+</body>
+</html>
